@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Lot</title>
+</head>
+<body>
+<h1>Edit Lot</h1>
+<form method="POST" action="{{ url_for('pages.lots.edit_lot', lot_id=lot.id) }}">
+    {{ form.csrf_token }}
+    <div>
+        <label for="title">Title:</label>
+        {{ form.title }}
+    </div>
+    <div>
+        <label for="description">Description:</label>
+        {{ form.description }}
+    </div>
+    <div>
+        <label for="width">Width:</label>
+        {{ form.width }}
+    </div>
+    <div>
+        <label for="height">Height:</label>
+        {{ form.height }}
+    </div>
+    <div>
+        <label for="weight">Weight:</label>
+        {{ form.weight }}
+    </div>
+    <div>
+        <label for="initial_price">Initial Price:</label>
+        {{ form.initial_price }}
+    </div>
+    <div>
+        <label for="minimum_bid">Minimum Bid:</label>
+        {{ form.minimum_bid }}
+    </div>
+    <div>
+        <label for="photo_url">Photo URL:</label>
+        {{ form.photo_url }}
+    </div>
+    <div>
+        <label for="auction_start_date">Auction Start Date:</label>
+        {{ form.auction_start_date(style="width: 200px", format="%Y-%m-%d %H:%M:%S") }}  <!-- Adjust the style and format -->
+    </div>
+    <div>
+        <label for="auction_end_date">Auction End Date:</label>
+        {{ form.auction_end_date(style="width: 200px", format="%Y-%m-%d %H:%M:%S") }}  <!-- Adjust the style and format -->
+    </div>
+    <button type="submit">Update</button>
+</form>
+</body>
+</html>
