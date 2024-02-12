@@ -116,22 +116,20 @@ def handle_disconnect():
 def handle_chat_message(data):
     message_text = data['message']
     lot_id = data['lot_id']
-    username = current_user.username  # Отримання імені поточного користувача
 
     # Find the lot associated with the message
     lot = Lot.query.get_or_404(lot_id)
 
-    # Check if the current user is the owner of the lot
-    if lot.owner_id != current_user.id:
-        # Create a new message object and associate it with the lot ID
-        message = Message(text=message_text, lot_id=lot_id, author=username)
+    # Create a new message object and associate it with the lot ID
+    message = Message(text=message_text, lot_id=lot_id)
 
-        # Save the message to the database
-        db.session.add(message)
-        db.session.commit()
+    # Save the message to the database
+    db.session.add(message)
+    db.session.commit()
 
-        # Fetch the updated chat history for the specific lot
-        chat_history = Message.query.filter_by(lot_id=lot_id).all()
+    # Fetch the updated chat history for the specific lot
+    chat_history = Message.query.filter_by(lot_id=lot_id).all()
 
-        # Broadcast the message and updated chat history to all clients in the chat
-        emit('chat_message', {'message': message_text, 'lot_id': lot_id, 'author': username}, broadcast=True)
+    # Broadcast the message and updated chat history to all clients in the chat
+    emit('chat_message', {'message': message_text, 'lot_id': lot_id})
+
