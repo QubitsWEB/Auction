@@ -4,26 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ lot.title }}</title>
-<!-- Include Socket.IO library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha384-SNLbaxPzG3EmJeN3c3Rvvxk+kfsW9mYpb8iIyB8S43JY7H6Ykmzqn3lZBSbh4Bo5" crossorigin="anonymous"></script>
-<script>
-    // Establish WebSocket connection
-    var socket = io();
-
-    // Function to send a chat message
-    function sendMessage() {
-        var message = document.getElementById('messageInput').value;
-        socket.emit('chat_message', { message: message, lot_id: '{{ lot.id }}' });
-    }
-
-    // Function to handle incoming chat messages
-    socket.on('chat_message', function(data) {
-        var messageList = document.getElementById('messageList');
-        var messageElement = document.createElement('li');
-        messageElement.textContent = data.message;
-        messageList.appendChild(messageElement);
-    });
-</script>
 </head>
 <body>
 <h1>{{ lot.title }}</h1>
@@ -38,14 +18,66 @@
 {% if lot.photo %}
     <img src="{{ lot.photo }}" alt="Lot Photo">
 {% endif %}
-<!-- Chat section -->
-<h2>Chat</h2>
-<ul id="messageList"></ul>
-<input type="text" id="messageInput">
-<button onclick="sendMessage()">Send</button>
 <!-- Edit button -->
 <form action="{{ url_for('pages.lots.edit_lot', lot_id=lot.id) }}" method="GET">
     <button type="submit">Edit</button>
 </form>
+
+<!-- Chat section -->
+<h2>Chat</h2>
+<ul id="chatHistory">
+    {% for message in chat_messages %}
+        <li>{{ message.text }}</li>
+    {% endfor %}
+</ul>
+<input type="text" id="messageInput">
+<button id="sendButton">Send</button>
+
+<!-- Include Socket.IO library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+
+<!-- Your JavaScript code -->
+<script>
+// Define socket variable
+var socket = io();
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch the chat history for the current lot
+    fetch('{{ url_for("pages.lots.get_chat_history", lot_id=lot.id) }}')
+        .then(response => response.json())
+        .then(data => {
+            // Display the chat history on the page
+            const chatHistory = document.getElementById('chatHistory');
+            data.forEach(message => {
+                const messageElement = document.createElement('li');
+                messageElement.textContent = message.text;
+                chatHistory.appendChild(messageElement);
+            });
+        })
+        .catch(error => console.error('Error fetching chat history:', error));
+});
+
+function sendMessage() {
+    const messageInput = document.getElementById('messageInput');
+    const message = messageInput.value.trim();
+    if (message !== '') {
+        var lotId = "{{ lot.id }}";  // Get the lot ID from the server-side template
+        socket.emit('chat_message', { message: message, lot_id: lotId });  // Include lot_id field
+        messageInput.value = '';
+    }
+// Оновлення чату при отриманні нового повідомлення через сокети
+socket.on('chat_message', function(data) {
+    // Отримано нове повідомлення, додаємо його до списку чату
+    const chatHistory = document.getElementById('chatHistory');
+    const messageElement = document.createElement('li');
+    messageElement.textContent = data.message;
+    chatHistory.appendChild(messageElement);
+});
+}
+
+// Example: Add a click event listener to the send button
+const sendButton = document.getElementById('sendButton');
+sendButton.addEventListener('click', sendMessage);
+</script>
 </body>
 </html>

@@ -1,8 +1,14 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from app.models.lot import db, Lot
+from flask import Blueprint, render_template, redirect, url_for, flash, jsonify
+from app.models.lot import Lot, Message
+from app.extensions import db
 from app.forms.lots import CreateAuctionLotForm, EditLotForm
 from flask_paginate import get_page_args
 from flask_login import current_user, login_required
+from flask_socketio import SocketIO, emit
+from app.extensions import socketio
+
+
+
 
 lots_bp = Blueprint("lots", __name__, url_prefix="/lots")
 
@@ -37,8 +43,10 @@ def create_lot():
 
 @lots_bp.route('/<lot_id>')
 def view_lot(lot_id):
-    lot = Lot.query.get(lot_id)
-    return render_template('pages/lot.html', lot=lot)
+    lot = Lot.query.get_or_404(lot_id)
+    chat_messages = Message.query.filter_by(lot_id=lot_id).all()
+    return render_template('pages/lot.html', lot=lot, chat_messages=chat_messages)
+
 
 @lots_bp.route('/edit/<lot_id>', methods=['GET', 'POST'])
 @login_required
@@ -71,6 +79,18 @@ def edit_lot(lot_id):
     # Render the edit lot template with the form and lot data
     return render_template('pages/edit_lot.html', form=form, lot=lot)
 
+@lots_bp.route('/chat_history/<lot_id>')
+def get_chat_history(lot_id):
+    # Retrieve the chat history for the specified lot from the database
+    messages = Message.query.filter_by(lot_id=lot_id).all()
+
+    # Serialize the messages to JSON
+    chat_history = [{'text': message.text, 'lot_id': message.lot_id} for message in messages]
+
+    # Return the chat history as JSON
+    return jsonify(chat_history)
+
+
 @lots_bp.route('/')
 def view_all_lots():
     # Pagination configuration
@@ -81,4 +101,35 @@ def view_all_lots():
     all_lots = Lot.query.paginate(page=page, per_page=per_page, error_out=False)
 
     return render_template('pages/all_lots.html', all_lots=all_lots)
+
+
+# WebSocket route
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Client disconnected')
+
+@socketio.on('chat_message')
+def handle_chat_message(data):
+    message_text = data['message']
+    lot_id = data['lot_id']
+
+    # Find the lot associated with the message
+    lot = Lot.query.get_or_404(lot_id)
+
+    # Create a new message object and associate it with the lot ID
+    message = Message(text=message_text, lot_id=lot_id)
+
+    # Save the message to the database
+    db.session.add(message)
+    db.session.commit()
+
+    # Fetch the updated chat history for the specific lot
+    chat_history = Message.query.filter_by(lot_id=lot_id).all()
+
+    # Broadcast the message and updated chat history to all clients in the chat
+    emit('chat_message', {'message': message_text, 'lot_id': lot_id})
 

@@ -36,8 +36,10 @@ def create_app(debug: bool = False):
     # setup_flask_logger()
 
     # Initialize extensions
-    from app.extensions import db, cors, csrf, cache, bcrypt, limiter, login_manager
+    from app.extensions import db, cors, csrf, cache, bcrypt, limiter, login_manager, socketio
 
+    # Initialize SocketIO with the Flask app instance
+    socketio.init_app(app)
     db.init_app(app)
     cors.init_app(app)
     csrf.init_app(app)

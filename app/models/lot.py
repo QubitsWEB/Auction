@@ -26,3 +26,13 @@ class Lot(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     owner = db.relationship('User', backref='lots')
+
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    lot_id = db.Column(db.Integer, db.ForeignKey('lot.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Message {self.id}>'
