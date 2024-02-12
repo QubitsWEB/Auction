@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, jsonify
-from app.models.lot import Lot, Message
+from app.models.lot import Lot, Message, Bid
 from app.extensions import db
 from app.forms.lots import CreateAuctionLotForm, EditLotForm
 from flask_paginate import get_page_args
@@ -115,6 +115,7 @@ def handle_disconnect():
 @socketio.on('chat_message')
 def handle_chat_message(data):
     message_text = data['message']
+    message_text = f'Message from {str(current_user.name)}: {message_text}'
     lot_id = data['lot_id']
 
     # Find the lot associated with the message
@@ -132,4 +133,18 @@ def handle_chat_message(data):
 
     # Broadcast the message and updated chat history to all clients in the chat
     emit('chat_message', {'message': message_text, 'lot_id': lot_id})
+
+@socketio.on('place_bid')
+def handle_place_bid(data):
+    lot_id = data['lot_id']
+    bid_amount = data['bid']
+    message_text = f'Bid from {str(current_user.name)}: {str(bid_amount)}'
+    lot = Lot.query.get_or_404(lot_id)
+    bid = Bid(amount=bid_amount, lot_id=lot_id)
+
+    db.session.add(bid)
+    db.session.commit()
+
+    emit('bid_placed', {'message': message_text, 'lot_id': lot_id}, broadcast=True)
+
 

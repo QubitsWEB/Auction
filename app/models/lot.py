@@ -36,3 +36,12 @@ class Message(db.Model):
 
     def __repr__(self):
         return f'<Message {self.id}>'
+
+class Bid(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Float, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    lot_id = db.Column(db.String, db.ForeignKey('lot.id'), nullable=False)
+
+    def __repr__(self):
+        return f'<Bid {self.id}>'

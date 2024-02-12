@@ -30,8 +30,12 @@
         <li>{{ message.text }}</li>
     {% endfor %}
 </ul>
-<input type="text" id="messageInput">
+<input type="text" id="messageInput" placeholder="Enter your message">
 <button id="sendButton">Send</button>
+
+<!-- Bid section -->
+<input type="number" id="bidInput" placeholder="Enter your bid" min="{{ lot.minimum_bid + 0.01 }}">
+<button id="placeBidButton">Place Bid</button>
 
 <!-- Include Socket.IO library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
@@ -63,6 +67,20 @@ function sendMessage() {
         socket.emit('chat_message', { message: message, lot_id: lotId });  // Include lot_id field
         messageInput.value = '';
     }
+}
+
+// Function to place a bid
+function placeBid() {
+    const bidInput = document.getElementById('bidInput');
+    const bid = parseFloat(bidInput.value.trim());
+    const minimumBid = parseFloat("{{ lot.minimum_bid }}");
+    if (!isNaN(bid) && bid > minimumBid) {
+        // Send bid data via sockets
+        var lotId = "{{ lot.id }}";
+        socket.emit('place_bid', { bid: bid, lot_id: lotId });
+        bidInput.value = '';  // Clear input field after placing bid
+    }
+}
 // Update the chat when a new message is received via sockets
 socket.on('chat_message', function(data) {
     // New message received, add it to the chat list
@@ -71,11 +89,14 @@ socket.on('chat_message', function(data) {
     messageElement.textContent = data.message;
     chatHistory.appendChild(messageElement);
 });
-}
-
 // Example: Add a click event listener to the send button
 const sendButton = document.getElementById('sendButton');
 sendButton.addEventListener('click', sendMessage);
+
+// Example: Add a click event listener to the place bid button
+const placeBidButton = document.getElementById('placeBidButton');
+placeBidButton.addEventListener('click', placeBid);
+
 </script>
 </body>
 </html>
