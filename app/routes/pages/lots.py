@@ -40,13 +40,12 @@ def create_lot():
 
     return render_template('pages/create_lot.html', form=form)
 
-
 @lots_bp.route('/<lot_id>')
 def view_lot(lot_id):
     lot = Lot.query.get_or_404(lot_id)
     chat_messages = Message.query.filter_by(lot_id=lot_id).all()
-    return render_template('pages/lot.html', lot=lot, chat_messages=chat_messages)
-
+    bids = Bid.query.filter_by(lot_id=lot_id).all()
+    return render_template('pages/lot.html', lot=lot, chat_messages=chat_messages, bids=bids)
 
 @lots_bp.route('/edit/<lot_id>', methods=['GET', 'POST'])
 @login_required
@@ -90,6 +89,18 @@ def get_chat_history(lot_id):
     # Return the chat history as JSON
     return jsonify(chat_history)
 
+@lots_bp.route('/get_bid_history/<lot_id>')
+def get_bid_history(lot_id):
+    # Retrieve the bid history for the specified lot from the database
+    bids = Bid.query.filter_by(lot_id=lot_id).all()
+
+    # Serialize the bids to JSON
+    bid_history = [{'amount': bid.amount, 'lot_id': bid.lot_id} for bid in bids]
+
+    # Return the bid history as JSON
+    return jsonify(bid_history)
+
+
 
 @lots_bp.route('/')
 def view_all_lots():
@@ -132,19 +143,19 @@ def handle_chat_message(data):
     chat_history = Message.query.filter_by(lot_id=lot_id).all()
 
     # Broadcast the message and updated chat history to all clients in the chat
-    emit('chat_message', {'message': message_text, 'lot_id': lot_id})
+    emit('chat_message', {'message': message_text, 'lot_id': lot_id}, broadcast=True)
 
 @socketio.on('place_bid')
 def handle_place_bid(data):
     lot_id = data['lot_id']
     bid_amount = data['bid']
     message_text = f'Bid from {str(current_user.name)}: {str(bid_amount)}'
+    bid_amount = message_text
     lot = Lot.query.get_or_404(lot_id)
     bid = Bid(amount=bid_amount, lot_id=lot_id)
 
     db.session.add(bid)
     db.session.commit()
 
-    emit('bid_placed', {'message': message_text, 'lot_id': lot_id}, broadcast=True)
-
-
+    emit('bid_history', {'message': bid_amount, 'lot_id': lot_id}, broadcast=True)
+    # Send the new minimum_bid value to the client

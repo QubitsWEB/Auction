@@ -39,7 +39,7 @@ class Message(db.Model):
 
 class Bid(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.Float, nullable=False)
+    amount = db.Column(db.String, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     lot_id = db.Column(db.String, db.ForeignKey('lot.id'), nullable=False)
 

@@ -34,6 +34,13 @@
 <button id="sendButton">Send</button>
 
 <!-- Bid section -->
+<h2>Bids</h2>
+<ul id="bidsHistory">
+    {% for bid in bids %}
+        <li>{{bid.amount }}</li>
+  {% endfor %}
+</ul>
+
 <input type="number" id="bidInput" placeholder="Enter your bid" min="{{ lot.minimum_bid + 0.01 }}">
 <button id="placeBidButton">Place Bid</button>
 
@@ -58,6 +65,20 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => console.error('Error fetching chat history:', error));
 });
+document.addEventListener('DOMContentLoaded', function() {
+    // Fetch the bid history for the current lot
+    fetch('{{ url_for("pages.lots.get_bid_history", lot_id=lot.id) }}')
+        .then(response => response.json())
+        .then(data => {
+            // Display the bid history on the page
+            const bidHistory = document.getElementById('bidHistory');
+             console.log(bid.amount); data.forEach(bid => {
+                const bidElement = document.createElement('li');
+                bidElement.textContent = bid.amount; console.log(bid.amount);
+            });
+        })
+        .catch(error => console.error('Error fetching bid history:', error));
+});
 
 function sendMessage() {
     const messageInput = document.getElementById('messageInput');
@@ -69,7 +90,6 @@ function sendMessage() {
     }
 }
 
-// Function to place a bid
 function placeBid() {
     const bidInput = document.getElementById('bidInput');
     const bid = parseFloat(bidInput.value.trim());
@@ -89,6 +109,15 @@ socket.on('chat_message', function(data) {
     messageElement.textContent = data.message;
     chatHistory.appendChild(messageElement);
 });
+// Оновлення ставок при отриманні нових даних через сокети
+socket.on('bid_history', function(data) {
+    // Отримано нові дані про ставку, додаємо їх до списку ставок
+    const bidHistory = document.getElementById('bidHistory');
+    const bidElement = document.createElement('li');
+    bidElement.textContent =  data.amount;
+    bidHistory.appendChild(bidElement);
+});
+
 // Example: Add a click event listener to the send button
 const sendButton = document.getElementById('sendButton');
 sendButton.addEventListener('click', sendMessage);
