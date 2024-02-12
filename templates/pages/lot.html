@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ lot.title }}</title>
+<!-- Include Socket.IO library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha384-SNLbaxPzG3EmJeN3c3Rvvxk+kfsW9mYpb8iIyB8S43JY7H6Ykmzqn3lZBSbh4Bo5" crossorigin="anonymous"></script>
+<script>
+    // Establish WebSocket connection
+    var socket = io();
+
+    // Function to send a chat message
+    function sendMessage() {
+        var message = document.getElementById('messageInput').value;
+        socket.emit('chat_message', { message: message, lot_id: '{{ lot.id }}' });
+    }
+
+    // Function to handle incoming chat messages
+    socket.on('chat_message', function(data) {
+        var messageList = document.getElementById('messageList');
+        var messageElement = document.createElement('li');
+        messageElement.textContent = data.message;
+        messageList.appendChild(messageElement);
+    });
+</script>
+</head>
+<body>
+<h1>{{ lot.title }}</h1>
+<p><strong>Description:</strong> {{ lot.description }}</p>
+<p><strong>Width:</strong> {{ lot.width }}</p>
+<p><strong>Height:</strong> {{ lot.height }}</p>
+<p><strong>Weight:</strong> {{ lot.weight }}</p>
+<p><strong>Initial Price:</strong> {{ lot.initial_price }}</p>
+<p><strong>Minimum Bid:</strong> {{ lot.minimum_bid }}</p>
+<p><strong>Auction Start Date:</strong> {{ lot.auction_start_date }}</p>
+<p><strong>Auction End Date:</strong> {{ lot.auction_end_date }}</p>
+{% if lot.photo %}
+    <img src="{{ lot.photo }}" alt="Lot Photo">
+{% endif %}
+<!-- Chat section -->
+<h2>Chat</h2>
+<ul id="messageList"></ul>
+<input type="text" id="messageInput">
+<button onclick="sendMessage()">Send</button>
+<!-- Edit button -->
+<form action="{{ url_for('pages.lots.edit_lot', lot_id=lot.id) }}" method="GET">
+    <button type="submit">Edit</button>
+</form>
+</body>
+</html>
