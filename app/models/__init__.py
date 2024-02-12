@@ -1,7 +1,7 @@
 from .auth import User
-from .lot import AuctionLot
+from .lot import Lot
 
 __all__ = [
     User,
-    AuctionLot
+    Lot
 ]

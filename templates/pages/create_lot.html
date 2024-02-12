@@ -3,17 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Створити Лот</title>
+<title>Create Lot</title>
 </head>
 <body>
-<h1>Створити Новий Лот</h1>
+<h1>Create New Lot</h1>
 <form method="POST">
     {{ form.hidden_tag() }}
-    {{ form.name.label }} {{ form.name() }}<br>
-    {{ form.description.label }} {{ form.description() }}<br>
-    {{ form.start_price.label }} {{ form.start_price() }}<br>
-    {{ form.auction_end_time.label }} {{ form.auction_end_time() }}<br>
-    <input type="submit" value="Створити Лот">
+    <div>
+        {{ form.title.label }}<br>
+        {{ form.title() }}<br>
+    </div>
+    <div>
+        {{ form.description.label }}<br>
+        {{ form.description() }}<br>
+    </div>
+    <div>
+        {{ form.width.label }}<br>
+        {{ form.width() }}<br>
+    </div>
+    <div>
+        {{ form.height.label }}<br>
+        {{ form.height() }}<br>
+    </div>
+    <div>
+        {{ form.weight.label }}<br>
+        {{ form.weight() }}<br>
+    </div>
+    <div>
+        {{ form.initial_price.label }}<br>
+        {{ form.initial_price() }}<br>
+    </div>
+    <div>
+        {{ form.minimum_bid.label }}<br>
+        {{ form.minimum_bid() }}<br>
+    </div>
+    <div>
+        {{ form.photo_url.label }}<br>
+        {{ form.photo_url() }}<br>
+    </div>
+    <div>
+        {{ form.auction_start_date.label }}<br>
+        {{ form.auction_start_date() }}<br>
+    </div>
+    <div>
+        {{ form.auction_end_date.label }}<br>
+        {{ form.auction_end_date() }}<br>
+    </div>
+    <input type="submit" value="Create Lot">
 </form>
 </body>
 </html>
