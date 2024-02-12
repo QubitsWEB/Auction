@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Створити Лот</title>
+</head>
+<body>
+<h1>Створити Новий Лот</h1>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {{ form.name.label }} {{ form.name() }}<br>
+    {{ form.description.label }} {{ form.description() }}<br>
+    {{ form.start_price.label }} {{ form.start_price() }}<br>
+    {{ form.auction_end_time.label }} {{ form.auction_end_time() }}<br>
+    <input type="submit" value="Створити Лот">
+</form>
+</body>
+</html>
