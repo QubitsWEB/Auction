@@ -50,9 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const chatHistory = document.getElementById('chatHistory');
             data.forEach(message => {
                 const messageElement = document.createElement('li');
-                messageElement.textContent = message.text;
-                chatHistory.appendChild(messageElement);
-            });
+                messageElement.textContent = message.text; });
         })
         .catch(error => console.error('Error fetching chat history:', error));
 });
@@ -65,9 +63,9 @@ function sendMessage() {
         socket.emit('chat_message', { message: message, lot_id: lotId });  // Include lot_id field
         messageInput.value = '';
     }
-// Оновлення чату при отриманні нового повідомлення через сокети
+// Update the chat when a new message is received via sockets
 socket.on('chat_message', function(data) {
-    // Отримано нове повідомлення, додаємо його до списку чату
+    // New message received, add it to the chat list
     const chatHistory = document.getElementById('chatHistory');
     const messageElement = document.createElement('li');
     messageElement.textContent = data.message;
